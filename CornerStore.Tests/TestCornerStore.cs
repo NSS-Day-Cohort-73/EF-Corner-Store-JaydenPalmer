@@ -1,6 +1,6 @@
-using CornerStore.Models;
-using System.Net.Http.Json;
 using System.Net;
+using System.Net.Http.Json;
+using CornerStore.Models;
 
 namespace CornerStore.Tests;
 
@@ -21,13 +21,15 @@ public class TestCornerStore
         Assert.Equal(8.24M, order1.Total);
         Assert.Equal(9.74M, order3.Total);
 
-        var response = await client.PostAsJsonAsync("/cashiers", new Cashier { FirstName = "Test", LastName = "Cashier" });
+        var response = await client.PostAsJsonAsync(
+            "/cashiers",
+            new Cashier { FirstName = "Test", LastName = "Cashier" }
+        );
         response.EnsureSuccessStatusCode();
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var content = await response.Content.ReadFromJsonAsync<Cashier>();
         Assert.Equal(4, content.Id);
         Assert.Equal("/cashiers/4", response.Headers.Location.ToString());
-
     }
 
     [Fact]
@@ -44,10 +46,21 @@ public class TestCornerStore
         Assert.Equal(2, cleanProducts.Count);
         Assert.Equal(4, tProducts.Count);
         Assert.Equal(1, vProducts.Count);
-        Assert.True(allProducts[0].Category != null && allProducts[0].Category.CategoryName != null);
+        Assert.True(
+            allProducts[0].Category != null && allProducts[0].Category.CategoryName != null
+        );
 
         //create
-        var response = await client.PostAsJsonAsync("/products", new Product { ProductName = "Test", CategoryId = 2, Price = 4.11M, Brand = "Test" });
+        var response = await client.PostAsJsonAsync(
+            "/products",
+            new Product
+            {
+                ProductName = "Test",
+                CategoryId = 2,
+                Price = 4.11M,
+                Brand = "Test",
+            }
+        );
         response.EnsureSuccessStatusCode();
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var content = await response.Content.ReadFromJsonAsync<Product>();
@@ -55,14 +68,17 @@ public class TestCornerStore
         Assert.Equal("/products/7", response.Headers.Location.ToString());
 
         //update
-        var updateResponse = await client.PutAsJsonAsync("/products/7", new Product
-        {
-            Id = 7,
-            ProductName = "Testing",
-            CategoryId = 2,
-            Brand = "Test",
-            Price = 4.22M
-        });
+        var updateResponse = await client.PutAsJsonAsync(
+            "/products/7",
+            new Product
+            {
+                Id = 7,
+                ProductName = "Testing",
+                CategoryId = 2,
+                Brand = "Test",
+                Price = 4.22M,
+            }
+        );
         response.EnsureSuccessStatusCode();
         Assert.Equal(HttpStatusCode.NoContent, updateResponse.StatusCode);
         var updatedProducts = await client.GetFromJsonAsync<List<Product>>("/products");
@@ -75,7 +91,6 @@ public class TestCornerStore
 
         // Assert.Equal(5, popularProducts.Count);
         // Assert.Equal("Tuna", popularProducts[0].ProductName);
-
     }
 
     [Fact]
@@ -102,15 +117,18 @@ public class TestCornerStore
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
 
         //create
-        var createResponse = await client.PostAsJsonAsync("/orders", new Order
-        {
-            CashierId = 2,
-            PaidOnDate = new DateTime(2023, 7, 24),
-            OrderProducts = new()
-             {
-                new OrderProduct {ProductId = 1, Quantity = 2}
-             }
-        });
+        var createResponse = await client.PostAsJsonAsync(
+            "/orders",
+            new Order
+            {
+                CashierId = 2,
+                PaidOnDate = new DateTime(2023, 7, 24),
+                OrderProducts = new()
+                {
+                    new OrderProduct { ProductId = 1, Quantity = 2 },
+                },
+            }
+        );
         createResponse.EnsureSuccessStatusCode();
         Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
         var content = await createResponse.Content.ReadFromJsonAsync<Order>();
