@@ -194,6 +194,22 @@ app.MapDelete(
     }
 );
 
+app.MapPost(
+    "/orders",
+    async (CornerStoreDbContext db, Order order) =>
+    {
+        db.Orders.Add(order);
+        db.SaveChangesAsync();
+
+        var postedOrderWithProducts = db
+            .Orders.Include(op => op.OrderProducts)
+            .ThenInclude(p => p.Product)
+            .FirstOrDefault(o => o.Id == order.Id);
+
+        return Results.Created($"/orders/{postedOrderWithProducts.Id}", postedOrderWithProducts);
+    }
+);
+
 app.Run();
 
 //don't move or change this!

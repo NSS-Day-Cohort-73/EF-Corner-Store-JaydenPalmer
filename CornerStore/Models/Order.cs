@@ -9,7 +9,12 @@ public class Order
     public decimal Total
     {
         //(decimal) for the explicit cast cus we're doing an int times a decimal
-        get { return (decimal)(OrderProducts?.Sum(op => op.Product.Price * op.Quantity)); }
+        get
+        {
+            return (decimal)(
+                OrderProducts?.Sum(op => (op?.Product?.Price ?? 0) * (op?.Quantity ?? 0))
+            );
+        }
     }
     public DateTime? PaidOnDate { get; set; }
 }
